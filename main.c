@@ -6,6 +6,13 @@ struct Cell {
     struct Cell* adjacent_cells[4];
 };
 
+enum Direction {
+    NORTH,
+    SOUTH,
+    WEST,
+    EAST
+};
+
 int main(void) {
     // Initialisation avec une graine dépendant du temps.
     srand(time(NULL));
