@@ -16,10 +16,15 @@ enum Direction {
 int main(int argc, char** argv) {
     // Initialisation avec une graine dépendant du temps.
     srand(time(NULL));
-    printf("%d", rand() % 100); // Nombre aléatoire entre 0 et 99.
+    printf("%d \n", rand() % 100 ); // Nombre aléatoire entre 0 et 99.
     int ligne, colonne;
     ligne = atoi(argv[1]);
     colonne = atoi(argv[2]);
     printf("Ligne: %d, Colonne: %d\n", ligne, colonne);
-    return 0;
+    struct Cell grid[ligne][colonne];
+    for (int i = 0; i <ligne; i++) {
+        for(int j = 0; j <colonne; j++) {
+            
+        }
+    }
 }
