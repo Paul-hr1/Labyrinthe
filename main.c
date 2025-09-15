@@ -13,8 +13,13 @@ enum Direction {
     EAST
 };
 
-int main(void) {
+int main(int argc, char** argv) {
     // Initialisation avec une graine dépendant du temps.
     srand(time(NULL));
     printf("%d", rand() % 100); // Nombre aléatoire entre 0 et 99.
+    int ligne, colonne;
+    ligne = atoi(argv[1]);
+    colonne = atoi(argv[2]);
+    printf("Ligne: %d, Colonne: %d\n", ligne, colonne);
+    return 0;
 }
