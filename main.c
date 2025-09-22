@@ -1,9 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <stdbool.h>
 
 struct Cell {
     struct Cell* adjacent_cells[4];
+    bool is_visited;
 };
 
 struct Grid{
@@ -16,7 +18,7 @@ enum Direction {
     NORTH,
     SOUTH,
     WEST,
-    EAST
+    EAST,
 };
 
 struct Position {
@@ -33,7 +35,7 @@ struct Tab {
 struct Tab* tabinit(int taille) {
     struct Tab* t = malloc(sizeof(struct Tab));
     t->positions = malloc(taille * sizeof(struct Position));
-    t->taille = taille;
+    t->taille = 0;
     t->capacite = taille;
     return t;
 }
@@ -100,12 +102,58 @@ void grid_print(struct Grid grid){
     printf("+\n");
 }
 
-void chemin(int ligne, int colonne){
+void chemin(struct Grid grid,int ligne, int colonne){
     struct Tab* tab = tabinit(ligne*colonne);
-    tab->positions[0].x = rand() % ligne;
-    tab->positions[0].y = rand() % colonne;
-    pushtab(tab, tab->positions[0]);
-    while(tab->taille <= )
+    struct Position start = { rand() % ligne, rand() % colonne};
+    pushtab(tab, start);
+    grid.cells[start.x][start.y].is_visited = true;
+    while(tab->taille > 0 ){;
+        struct Position current = tab->positions[tab->taille - 1];
+        struct Position next;
+        printf("PAUL\n");
+        if (current.y - 1 < 0 || grid.cells[current.x][current.y - 1].is_visited == true &&
+            current.y + 1 >= colonne || grid.cells[current.x][current.y + 1].is_visited == true &&
+            current.x - 1 < 0 || grid.cells[current.x - 1][current.y].is_visited == true &&
+            current.x + 1 >= ligne || grid.cells[current.x + 1][current.y].is_visited == true) {
+            printf("pablo: %d, picasso: %d \n",current.x,current.y);
+            poptab(tab);
+            continue;
+        }
+        printf("pablo: %d, escobar: %d \n",current.x,current.y);
+        int random = rand() % 4;
+        
+        switch (random)
+        {
+        case 0: //WEST
+            next.x = current.x - 1;
+            next.y = current.y;
+            break;
+        case 1: //NORTH
+            next.x = current.x;
+            next.y = current.y - 1;
+            break;
+        case 2: //SOUTH
+            next.x = current.x;
+            next.y = current.y + 1;
+            break;
+        case 3: //EAST
+            next.x = current.x + 1;
+            next.y = current.y;
+            break;
+        default:
+            break;
+        }
+
+        if(next.x < 0 || next.x >= ligne || next.y < 0 || next.y >= colonne){
+            continue;
+        }
+        if(grid.cells[next.x][next.y].is_visited == false){
+            current = next;
+            pushtab(tab,current);
+            grid.cells[current.x][current.y].is_visited = true;
+            printf("ligne: %d, colone: %d\n",current.x,current.y);
+        }  
+    }
 }
 
 int main(int argc, char** argv) {
@@ -116,7 +164,7 @@ int main(int argc, char** argv) {
     colonne = atoi(argv[2]);
     printf("Ligne: %d, Colonne: %d\n", ligne, colonne);
     struct Grid grid = grid_initialize(ligne, colonne);
-    grid_print(grid);
-    chemin(ligne, colonne);
+    chemin(grid,ligne, colonne);
+    // grid_print(grid);
     return 0;
 }
