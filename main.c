@@ -85,21 +85,35 @@ struct Grid grid_initialize(int ligne, int colonne) {
 void grid_print(struct Grid grid){
     for (int i = 0; i < grid.ligne; i++) {
         for (int j = 0; j < grid.colonne; j++) {
-            if (grid.cells[i][j].adjacent_cells[WEST] != NULL)
+            if(i==0){
+                printf("+---");
+                continue;
+            }
+            if (grid.cells[i][j].adjacent_cells[NORTH] != NULL)
             {
                 printf("+   ");
-            } else {
+            } 
+            else
+            {
                 printf("+---");
             }
         }
         printf("+\n");
 
         for (int j = 0; j < grid.colonne; j++) {
-            if(grid.cells[i][j].is_visited){
-                printf("| * ");
-            } else {
+            if(j==0){
+                printf("|   ");
+                continue;
+            }
+            if (grid.cells[i][j].adjacent_cells[WEST] != NULL)
+            {
+                printf("    ");
+            }
+            else
+            {
                 printf("|   ");
             }
+
         }
 
     printf("|\n");
@@ -120,59 +134,131 @@ void chemin(struct Grid grid,int ligne, int colonne){
     while(tab->taille > 0 ){
         struct Position current = tab->positions[tab->taille - 1];
         struct Position next;
-        // printf("PAUL\n");
         if (((current.y - 1 < 0) || (grid.cells[current.x][current.y - 1].is_visited == true)) &&
             ((current.y + 1 >= colonne) || (grid.cells[current.x][current.y + 1].is_visited == true)) &&
             ((current.x - 1 < 0) || (grid.cells[current.x - 1][current.y].is_visited == true)) &&
             ((current.x + 1 >= ligne) || (grid.cells[current.x + 1][current.y].is_visited == true))){
-            printf("pablo: %d, picasso: %d \n",current.x,current.y);
             poptab(tab);
             continue;
         }
-        // printf("pablo: %d, escobar: %d \n",current.x,current.y);
         int random = rand() % 4;
         
         switch (random)
         {
-        case 0: //WEST
-            next.x = current.x - 1;
+        case 0: //NORTH
+            next.x = current.x -1;
             next.y = current.y;
+            if(next.x < 0 || grid.cells[next.x][next.y].is_visited){
+                continue;
+            }
+            grid.cells[current.x][current.y].adjacent_cells[NORTH] = &grid.cells[next.x][next.y];
+            grid.cells[next.x][next.y].adjacent_cells[SOUTH] = &grid.cells[current.x][current.y];
             break;
-        case 1: //NORTH
-            next.x = current.x;
-            next.y = current.y - 1;
+        case 1: //SOUTH
+            next.x = current.x +1;
+            next.y = current.y ;
+            if(next.x >= colonne || grid.cells[next.x][next.y].is_visited){
+                continue;
+            }
+            grid.cells[current.x][current.y].adjacent_cells[SOUTH] = &grid.cells[next.x][next.y];
+            grid.cells[next.x][next.y].adjacent_cells[NORTH] = &grid.cells[current.x][current.y];
             break;
-        case 2: //SOUTH
-            next.x = current.x;
-            next.y = current.y + 1;
+        case 2: //WEST
+            next.x = current.x ;
+            next.y = current.y -1;
+            if(next.y < 0 || grid.cells[next.x][next.y].is_visited){
+                continue;
+            }
+            grid.cells[current.x][current.y].adjacent_cells[WEST] = &grid.cells[next.x][next.y];
+            grid.cells[next.x][next.y].adjacent_cells[EAST] = &grid.cells[current.x][current.y];
             break;
         case 3: //EAST
-            next.x = current.x + 1;
-            next.y = current.y;
+            next.x = current.x ;
+            next.y = current.y +1;
+            if(next.y >= ligne || grid.cells[next.x][next.y].is_visited){
+                continue;
+            }
+            grid.cells[current.x][current.y].adjacent_cells[EAST] = &grid.cells[next.x][next.y];
+            grid.cells[next.x][next.y].adjacent_cells[WEST] = &grid.cells[current.x][current.y];
             break;
         default:
             break;
         }
 
-        if(next.x < 0 || next.x >= ligne || next.y < 0 || next.y >= colonne){
-            continue;
-        }
-        if(grid.cells[next.x][next.y].is_visited == false){
-            current = next;
-            pushtab(tab,current);
-            grid.cells[current.x][current.y].is_visited = true;
-            printf("ligne: %d, colone: %d\n",current.x,current.y);
-        }  
+        current = next;
+        pushtab(tab,current);
+        grid.cells[current.x][current.y].is_visited = true; 
     }
 }
 
-int main(int argc, char** argv) {
+
+void resolution(struct Grid grid){
+    struct Tab* tab = tabinit(grid.ligne*grid.colonne);
+    struct Position start = {0, 0};
+    pushtab(tab, start);
+    while(tab->taille > 0 ){
+        struct Position current = tab->positions[tab->taille - 1];
+        struct Position next;
+        if (current.x == grid.ligne -1 && current.y == grid.colonne -1){
+            printf("Chemin trouvé !\n");
+            return;
+        }
+        if (((current.y - 1 < 0) || (grid.cells[current.x][current.y - 1].is_visited == true)) &&
+            ((current.y + 1 >= grid.colonne) || (grid.cells[current.x][current.y + 1].is_visited == true)) &&
+            ((current.x - 1 < 0) || (grid.cells[current.x - 1][current.y].is_visited == true)) &&
+            ((current.x + 1 >= grid.ligne) || (grid.cells[current.x + 1][current.y].is_visited == true))){
+            poptab(tab);
+            continue;
+        }
+        int random = rand() % 4;
+        
+        switch (random)
+        {
+        case 0: //NORTH
+            next.x = current.x -1;
+            next.y = current.y;
+            if(next.x < 0 || grid.cells[next.x][next.y].is_visited || grid.cells[current.x][current.y].adjacent_cells[NORTH] == NULL){
+                continue;
+            }
+            break;
+        case 1: //SOUTH
+            next.x = current.x +1;
+            next.y = current.y ;
+            if(next.x >= grid.ligne || grid.cells[next.x][next.y].is_visited || grid.cells[current.x][current.y].adjacent_cells[SOUTH] == NULL){
+                continue;
+            }
+            break;
+        case 2: //WEST
+            next.x = current.x ;
+            next.y = current.y -1;
+            if(next.y < 0 || grid.cells[next.x][next.y].is_visited || grid.cells[current.x][current.y].adjacent_cells[WEST] == NULL){
+                continue;
+            }
+            break;
+        case 3: //EAST
+            next.x = current.x ;
+            next.y = current.y +1;
+            if(next.y >= grid.colonne || grid.cells[next.x][next.y].is_visited || grid.cells[current.x][current.y].adjacent_cells[EAST] == NULL){
+                continue;
+            }
+            break;
+        default:
+            break;
+        }
+        current = next;
+        pushtab(tab,current);
+        grid.cells[current.x][current.y].is_visited = true;
+    }
+}
+
+
+int main(int argc, char** argv) { 
     srand(time(NULL));
-    printf("%d \n", rand() % 100 ); // Nombre aléatoire entre 0 et 99.
+    // printf("%d \n", rand() % 100 ); // Nombre aléatoire entre 0 et 99.
     int ligne, colonne;
     ligne = atoi(argv[1]);
     colonne = atoi(argv[2]);
-    printf("Ligne: %d, Colonne: %d\n", ligne, colonne);
+    // printf("Ligne: %d, Colonne: %d\n", ligne, colonne);
     struct Grid grid = grid_initialize(ligne, colonne);
     chemin(grid,ligne, colonne);
     grid_print(grid);
