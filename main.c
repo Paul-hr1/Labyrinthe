@@ -64,6 +64,7 @@ struct Cell cell_initialize() {
     for (int i = 0; i < 4; i++) {
         cell.adjacent_cells[i] = NULL;
     }
+    cell.is_visited = false;
     return cell;
 }
 
@@ -84,12 +85,21 @@ struct Grid grid_initialize(int ligne, int colonne) {
 void grid_print(struct Grid grid){
     for (int i = 0; i < grid.ligne; i++) {
         for (int j = 0; j < grid.colonne; j++) {
-            printf("+---");
+            if (grid.cells[i][j].adjacent_cells[WEST] != NULL)
+            {
+                printf("+   ");
+            } else {
+                printf("+---");
+            }
         }
         printf("+\n");
 
         for (int j = 0; j < grid.colonne; j++) {
-            printf("|   ");
+            if(grid.cells[i][j].is_visited){
+                printf("| * ");
+            } else {
+                printf("|   ");
+            }
         }
 
     printf("|\n");
@@ -107,19 +117,19 @@ void chemin(struct Grid grid,int ligne, int colonne){
     struct Position start = { rand() % ligne, rand() % colonne};
     pushtab(tab, start);
     grid.cells[start.x][start.y].is_visited = true;
-    while(tab->taille > 0 ){;
+    while(tab->taille > 0 ){
         struct Position current = tab->positions[tab->taille - 1];
         struct Position next;
-        printf("PAUL\n");
-        if (current.y - 1 < 0 || grid.cells[current.x][current.y - 1].is_visited == true &&
-            current.y + 1 >= colonne || grid.cells[current.x][current.y + 1].is_visited == true &&
-            current.x - 1 < 0 || grid.cells[current.x - 1][current.y].is_visited == true &&
-            current.x + 1 >= ligne || grid.cells[current.x + 1][current.y].is_visited == true) {
+        // printf("PAUL\n");
+        if (((current.y - 1 < 0) || (grid.cells[current.x][current.y - 1].is_visited == true)) &&
+            ((current.y + 1 >= colonne) || (grid.cells[current.x][current.y + 1].is_visited == true)) &&
+            ((current.x - 1 < 0) || (grid.cells[current.x - 1][current.y].is_visited == true)) &&
+            ((current.x + 1 >= ligne) || (grid.cells[current.x + 1][current.y].is_visited == true))){
             printf("pablo: %d, picasso: %d \n",current.x,current.y);
             poptab(tab);
             continue;
         }
-        printf("pablo: %d, escobar: %d \n",current.x,current.y);
+        // printf("pablo: %d, escobar: %d \n",current.x,current.y);
         int random = rand() % 4;
         
         switch (random)
@@ -165,6 +175,6 @@ int main(int argc, char** argv) {
     printf("Ligne: %d, Colonne: %d\n", ligne, colonne);
     struct Grid grid = grid_initialize(ligne, colonne);
     chemin(grid,ligne, colonne);
-    // grid_print(grid);
+    grid_print(grid);
     return 0;
 }
