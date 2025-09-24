@@ -193,62 +193,7 @@ void chemin(struct Grid grid,int ligne, int colonne){
 
 
 void resolution(struct Grid grid){
-    struct Tab* tab = tabinit(grid.ligne*grid.colonne);
-    struct Position start = {0, 0};
-    pushtab(tab, start);
-    while(tab->taille > 0 ){
-        struct Position current = tab->positions[tab->taille - 1];
-        struct Position next;
-        if (current.x == grid.ligne -1 && current.y == grid.colonne -1){
-            printf("Chemin trouvé !\n");
-            return;
-        }
-        if (((current.y - 1 < 0) || (grid.cells[current.x][current.y - 1].is_visited == true)) &&
-            ((current.y + 1 >= grid.colonne) || (grid.cells[current.x][current.y + 1].is_visited == true)) &&
-            ((current.x - 1 < 0) || (grid.cells[current.x - 1][current.y].is_visited == true)) &&
-            ((current.x + 1 >= grid.ligne) || (grid.cells[current.x + 1][current.y].is_visited == true))){
-            poptab(tab);
-            continue;
-        }
-        int random = rand() % 4;
-        
-        switch (random)
-        {
-        case 0: //NORTH
-            next.x = current.x -1;
-            next.y = current.y;
-            if(next.x < 0 || grid.cells[next.x][next.y].is_visited || grid.cells[current.x][current.y].adjacent_cells[NORTH] == NULL){
-                continue;
-            }
-            break;
-        case 1: //SOUTH
-            next.x = current.x +1;
-            next.y = current.y ;
-            if(next.x >= grid.ligne || grid.cells[next.x][next.y].is_visited || grid.cells[current.x][current.y].adjacent_cells[SOUTH] == NULL){
-                continue;
-            }
-            break;
-        case 2: //WEST
-            next.x = current.x ;
-            next.y = current.y -1;
-            if(next.y < 0 || grid.cells[next.x][next.y].is_visited || grid.cells[current.x][current.y].adjacent_cells[WEST] == NULL){
-                continue;
-            }
-            break;
-        case 3: //EAST
-            next.x = current.x ;
-            next.y = current.y +1;
-            if(next.y >= grid.colonne || grid.cells[next.x][next.y].is_visited || grid.cells[current.x][current.y].adjacent_cells[EAST] == NULL){
-                continue;
-            }
-            break;
-        default:
-            break;
-        }
-        current = next;
-        pushtab(tab,current);
-        grid.cells[current.x][current.y].is_visited = true;
-    }
+    
 }
 
 
