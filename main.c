@@ -49,21 +49,16 @@ struct Queue* queueinit(int taille) {
     return q;
 }
 
-struct Queue* pushQueue(struct Queue* queue, struct Position element) {
-    if ((queue->fin + 1) % queue->capacite == queue->debut) {
-        queue->capacite *= 2;
-    }
+void pushQueue(struct Queue* queue, struct Position element) {
     queue->positions[queue->fin] = element;
-    queue->fin = (queue->fin + 1) % queue->capacite;
-    return queue;
+    queue->fin = (queue->fin + 1);
 }
 
-struct Queue* popQueue(struct Queue* queue){
+struct Position popQueue(struct Queue* queue){
     if (queue->debut == queue->fin) {
-        return queue;
+        return queue->positions[0];
     }
-    queue->debut = (queue->debut + 1) % queue->capacite;
-    return queue;
+    return queue->positions[queue->debut++];
 }
 
 
@@ -232,20 +227,36 @@ void resolution(struct Grid grid){
     struct Queue* queue = queueinit((grid.ligne)*(grid.colonne));
     struct Position start = { grid.ligne -1, 0};
     struct Position end = { 0, grid.colonne -1};
-    while(queue->capacite > 0 ){
-        switch(queue->positions->x && queue->positions->y){
-            case(grid.cells[i][j].adjacent_cells[NORTH]):
-                if(grid.cells[i-1][j].from == NULL){
-                    struct Position next = {i-1, j};
-                    pushQueue(queue, next);
-                    grid.cells[i-1][j].from = &grid.cells[i][j];
-                }
-                break;
+    while(queue->debut != queue->fin){
+        struct Position current = popQueue(queue);
+        int i = current.x;
+        int j = current.y;
+        if(i == end.x && j == end.y){
+            printf("Chemin trouvé !\n");
+            return;
         }
-    } 
-
-}
-
+        if(grid.cells[i][j].adjacent_cells[NORTH] != NULL){
+            struct Position next = {i-1, j};
+            pushQueue(queue, next);
+            grid.cells[i-1][j].from = &grid.cells[i][j];
+        }
+        if(grid.cells[i][j].adjacent_cells[SOUTH] != NULL){
+            struct Position next = {i+1, j};
+            pushQueue(queue, next);
+            grid.cells[i+1][j].from = &grid.cells[i][j];
+        }
+        if(grid.cells[i][j].adjacent_cells[WEST] != NULL){
+            struct Position next = {i, j-1};
+            pushQueue(queue, next);
+            grid.cells[i][j-1].from = &grid.cells[i][j];
+        }
+        if(grid.cells[i][j].adjacent_cells[EAST] != NULL){
+            struct Position next = {i, j+1};
+            pushQueue(queue, next);
+            grid.cells[i][j+1].from = &grid.cells[i][j];
+        }
+        }
+    }
 
 int main(int argc, char** argv) { 
     srand(time(NULL));
@@ -256,6 +267,7 @@ int main(int argc, char** argv) {
     // printf("Ligne: %d, Colonne: %d\n", ligne, colonne);
     struct Grid grid = grid_initialize(ligne, colonne);
     chemin(grid,ligne, colonne);
+    resolution(grid);
     grid_print(grid);
     return 0;
 }
