@@ -6,6 +6,7 @@
 struct Cell {
     struct Cell* adjacent_cells[4];
     bool is_visited;
+    struct cell* from;
 };
 
 struct Grid{
@@ -31,6 +32,40 @@ struct Tab {
     int taille;
     int capacite;
 };
+
+struct Queue {
+    struct Position* positions;
+    int debut;
+    int fin;
+    int capacite;
+};
+
+struct Queue* queueinit(int taille) {
+    struct Queue* q = malloc(sizeof(struct Queue));
+    q->positions = malloc(taille * sizeof(struct Position));
+    q->debut = 0;
+    q->fin = 0;
+    q->capacite = taille;
+    return q;
+}
+
+struct Queue* pushQueue(struct Queue* queue, struct Position element) {
+    if ((queue->fin + 1) % queue->capacite == queue->debut) {
+        queue->capacite *= 2;
+    }
+    queue->positions[queue->fin] = element;
+    queue->fin = (queue->fin + 1) % queue->capacite;
+    return queue;
+}
+
+struct Queue* popQueue(struct Queue* queue){
+    if (queue->debut == queue->fin) {
+        return queue;
+    }
+    queue->debut = (queue->debut + 1) % queue->capacite;
+    return queue;
+}
+
 
 struct Tab* tabinit(int taille) {
     struct Tab* t = malloc(sizeof(struct Tab));
@@ -65,6 +100,7 @@ struct Cell cell_initialize() {
         cell.adjacent_cells[i] = NULL;
     }
     cell.is_visited = false;
+    cell.from = NULL;
     return cell;
 }
 
@@ -127,7 +163,7 @@ void grid_print(struct Grid grid){
 }
 
 void chemin(struct Grid grid,int ligne, int colonne){
-    struct Tab* tab = tabinit(ligne*colonne);
+    struct Tab* tab = tabinit((ligne)*(colonne));
     struct Position start = { rand() % ligne, rand() % colonne};
     pushtab(tab, start);
     grid.cells[start.x][start.y].is_visited = true;
@@ -157,7 +193,7 @@ void chemin(struct Grid grid,int ligne, int colonne){
         case 1: //SOUTH
             next.x = current.x +1;
             next.y = current.y ;
-            if(next.x >= colonne || grid.cells[next.x][next.y].is_visited){
+            if(next.x >= ligne || grid.cells[next.x][next.y].is_visited){
                 continue;
             }
             grid.cells[current.x][current.y].adjacent_cells[SOUTH] = &grid.cells[next.x][next.y];
@@ -175,7 +211,7 @@ void chemin(struct Grid grid,int ligne, int colonne){
         case 3: //EAST
             next.x = current.x ;
             next.y = current.y +1;
-            if(next.y >= ligne || grid.cells[next.x][next.y].is_visited){
+            if(next.y >= colonne || grid.cells[next.x][next.y].is_visited){
                 continue;
             }
             grid.cells[current.x][current.y].adjacent_cells[EAST] = &grid.cells[next.x][next.y];
@@ -193,7 +229,21 @@ void chemin(struct Grid grid,int ligne, int colonne){
 
 
 void resolution(struct Grid grid){
-    
+    struct Queue* queue = queueinit((grid.ligne)*(grid.colonne));
+    struct Position start = { grid.ligne -1, 0};
+    struct Position end = { 0, grid.colonne -1};
+    while(queue->capacite > 0 ){
+        switch(queue->positions->x && queue->positions->y){
+            case(grid.cells[i][j].adjacent_cells[NORTH]):
+                if(grid.cells[i-1][j].from == NULL){
+                    struct Position next = {i-1, j};
+                    pushQueue(queue, next);
+                    grid.cells[i-1][j].from = &grid.cells[i][j];
+                }
+                break;
+        }
+    } 
+
 }
 
 
