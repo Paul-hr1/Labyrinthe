@@ -6,7 +6,8 @@
 struct Cell {
     struct Cell* adjacent_cells[4];
     bool is_visited;
-    struct cell* from;
+    struct Cell* from;
+    bool is_in_path;
 };
 
 struct Grid{
@@ -96,6 +97,7 @@ struct Cell cell_initialize() {
     }
     cell.is_visited = false;
     cell.from = NULL;
+    cell.is_in_path = false;
     return cell;
 }
 
@@ -132,17 +134,23 @@ void grid_print(struct Grid grid){
         printf("+\n");
 
         for (int j = 0; j < grid.colonne; j++) {
-            if(j==0){
-                printf("|   ");
-                continue;
-            }
             if (grid.cells[i][j].adjacent_cells[WEST] != NULL)
             {
-                printf("    ");
+                if (grid.cells[i][j].is_in_path == true){
+                    printf("  * ");
+                }
+                else{
+                    printf("    ");
+                }
             }
             else
             {
-                printf("|   ");
+                if (grid.cells[i][j].is_in_path == true){
+                    printf("| * ");
+                }
+                else{
+                    printf("|   ");
+                }
             }
 
         }
@@ -220,6 +228,11 @@ void chemin(struct Grid grid,int ligne, int colonne){
         pushtab(tab,current);
         grid.cells[current.x][current.y].is_visited = true; 
     }
+    for (int i = 0; i < ligne; i++) {
+        for (int j = 0; j < colonne; j++) {
+            grid.cells[i][j].is_visited = false;
+        }
+    }
 }
 
 
@@ -227,36 +240,42 @@ void resolution(struct Grid grid){
     struct Queue* queue = queueinit((grid.ligne)*(grid.colonne));
     struct Position start = { grid.ligne -1, 0};
     struct Position end = { 0, grid.colonne -1};
+    pushQueue(queue, start);
     while(queue->debut != queue->fin){
         struct Position current = popQueue(queue);
         int i = current.x;
         int j = current.y;
-        if(i == end.x && j == end.y){
-            printf("Chemin trouvé !\n");
-            return;
-        }
-        if(grid.cells[i][j].adjacent_cells[NORTH] != NULL){
+        grid.cells[i][j].is_visited = true;
+        if(grid.cells[i][j].adjacent_cells[NORTH] != NULL && grid.cells[i-1][j].is_visited == false){
             struct Position next = {i-1, j};
             pushQueue(queue, next);
             grid.cells[i-1][j].from = &grid.cells[i][j];
         }
-        if(grid.cells[i][j].adjacent_cells[SOUTH] != NULL){
+        if(grid.cells[i][j].adjacent_cells[SOUTH] != NULL && grid.cells[i+1][j].is_visited == false){
             struct Position next = {i+1, j};
             pushQueue(queue, next);
             grid.cells[i+1][j].from = &grid.cells[i][j];
         }
-        if(grid.cells[i][j].adjacent_cells[WEST] != NULL){
+        if(grid.cells[i][j].adjacent_cells[WEST] != NULL && grid.cells[i][j-1].is_visited == false){
             struct Position next = {i, j-1};
             pushQueue(queue, next);
             grid.cells[i][j-1].from = &grid.cells[i][j];
         }
-        if(grid.cells[i][j].adjacent_cells[EAST] != NULL){
+        if(grid.cells[i][j].adjacent_cells[EAST] != NULL && grid.cells[i][j+1].is_visited == false){
             struct Position next = {i, j+1};
             pushQueue(queue, next);
             grid.cells[i][j+1].from = &grid.cells[i][j];
         }
-        }
     }
+    grid.cells[0][grid.colonne - 1].is_in_path = true;
+    struct Cell* current = &grid.cells[0][grid.colonne - 1];
+    while(current->from != NULL){
+        current = current->from;
+        current->is_in_path = true;
+    }
+    
+    
+}
 
 int main(int argc, char** argv) { 
     srand(time(NULL));
